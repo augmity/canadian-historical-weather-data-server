@@ -1,0 +1,25 @@
+{
+  "name": "canadian-historical-weather-data-server",
+  "description": "A GraphQL server written in NodeJS that provides historical weather data from https://climate.weather.gc.ca",
+  "version": "0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "canada",
+    "historical",
+    "weather",
+    "data",
+    "graphql",
+    "express",
+    "nodejs"
+  ],
+  "author": "augmity",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "^2.9.9",
+    "graphql": "^14.5.8"
+  }
+}
