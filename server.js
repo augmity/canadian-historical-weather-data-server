@@ -1,5 +1,7 @@
 const fs = require('fs');
+const request = require('request');
 const { ApolloServer, gql } = require('apollo-server');
+const csv=require('csvtojson');
 
 
 // Weather stations data are stored in a JSON file inside this project for simplicity.
@@ -8,6 +10,7 @@ const { ApolloServer, gql } = require('apollo-server');
 // (https://drive.google.com/file/d/1egfzGgzUb0RFu_EE5AYFZtsyXPfZ11y2/view)
 //
 const weatherStations = JSON.parse(fs.readFileSync('weather-stations.json'));
+
 
 // Schema 
 const typeDefs = gql`
@@ -34,26 +37,93 @@ const typeDefs = gql`
     mlyLastYear: Int
   }
 
+  type WeatherStationData {
+    latitude: Float
+    longitude: Float
+    stationName: String
+    climateId: String
+    dateTime: String
+    year: Int
+    month: Int
+    day: Int
+    dataQuality: String
+    maxTemp: Float
+    maxTempFlag: String
+    minTemp: Float
+    minTempFlag: String
+    meanTemp: Float
+    meanTempFlag: String
+    heatDegDays: Float
+    heatDegDaysFlag: String
+    coolDegDays: Float
+    coolDegDaysFlag: String
+    totalRain: Float
+    totalRainFlag: String
+    totalSnow: Float
+    totalSnowFlag: String
+    totalPrecip: Float
+    totalPrecipFlag: String
+    snowonGrnd: Float
+    snowonGrndFlag: String
+    dirofMaxGust: Float
+    dirofMaxGustFlag: String
+    spdofMaxGust: Float
+    spdofMaxGustFlag: String
+  }
+
   type Query {
     weatherStations: [WeatherStation]
+    weatherStationData(stationId: Int!, year: Int!): [WeatherStationData]
     provinces: [String]
   }
 `;
 
+
 // Resolvers
+
+const getWeatherStationData = (stationId, year) => {
+  const uri = `https://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${stationId}&Year=${year}&timeframe=2`;
+  const toFloat = (item) => {
+    return (item && item !== '') ? parseFloat(item) : null;
+  }
+
+  return csv({
+    noheader: false,
+    headers: ['longitude', 'latitude', 'stationName', 'climateId', 'dateTime', 'year', 'month', 'day', 'dataQuality', 'maxTemp', 'maxTempFlag', 'minTemp', 'minTempFlag', 'meanTemp', 'meanTempFlag', 'heatDegDays', 'heatDegDaysFlag', 'coolDegDays', 'coolDegDaysFlag', 'totalRain', 'totalRainFlag', 'totalSnow', 'totalSnowFlag', 'totalPrecip', 'totalPrecipFlag', 'snowonGrnd', 'snowonGrndFlag', 'dirofMaxGust', 'dirofMaxGustFlag', 'spdofMaxGust', 'spdofMaxGustFlag'],
+    colParser:{
+      totalRain: toFloat,
+      maxTemp: toFloat,
+      minTemp: toFloat,
+      meanTemp: toFloat,
+      heatDegDays: toFloat,
+      coolDegDays: toFloat,
+      totalRain: toFloat,
+      totalSnow: toFloat,
+      totalPrecip: toFloat,
+      snowonGrnd: toFloat,
+      dirofMaxGust: toFloat,
+      spdofMaxGust: toFloat,
+    }
+  })
+  .fromStream(request.get(uri));
+}
+
+const getProvinces = () => {
+  // Get all the unique province names from the weather stations array
+  return weatherStations
+    .reduce((accumulator, item) => {
+      if (accumulator.indexOf(item.province) === -1) {
+        accumulator.push(item.province);
+      }
+      return accumulator
+    }, [])
+}
+
 const resolvers = {
   Query: {
     weatherStations: () => weatherStations,
-    provinces: () => {
-      // Get all the unique province names from the weather stations array
-      return weatherStations
-        .reduce((accumulator, item) => {
-          if (accumulator.indexOf(item.province) === -1) {
-            accumulator.push(item.province);
-          }
-          return accumulator
-        }, [])
-    }
+    weatherStationData: (parent, {stationId, year}) => getWeatherStationData(stationId, year),
+    provinces: getProvinces
   },
 };
 
