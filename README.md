@@ -7,3 +7,11 @@ Uses [https://www.apollographql.com/](https://www.apollographql.com/) server lib
 ## Demo
 
 [https://historical-weather-data-canada.herokuapp.com/](https://historical-weather-data-canada.herokuapp.com/)
+
+## Updating the Weather Stations data
+
+- Download the most up-to-date version of the canadian weather stations CSV file from here: https://drive.google.com/open?id=1egfzGgzUb0RFu_EE5AYFZtsyXPfZ11y2
+- Save it in the root folder of this project as `data.csv`
+- IMPORTANT! Remove all the lines before the CSV header in the `data.csv` file. For some reason the first three lines or so are just comments.
+- Run `npm update-weather-stations`
+- Commit the changes to the git repository, rebuild the server

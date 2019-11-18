@@ -9,7 +9,8 @@ const csv=require('csvtojson');
 // 
 // (https://drive.google.com/file/d/1egfzGgzUb0RFu_EE5AYFZtsyXPfZ11y2/view)
 //
-const weatherStations = JSON.parse(fs.readFileSync('weather-stations.json'));
+const weatherStationsData = JSON.parse(fs.readFileSync('weather-stations.json'));
+const weatherStations = weatherStationsData.data;
 
 
 // Schema 
@@ -74,7 +75,8 @@ const typeDefs = gql`
   type Query {
     weatherStations: [WeatherStation]
     weatherStationData(stationId: Int!, year: Int!): [WeatherStationData]
-    provinces: [String]
+    provinces: [String],
+    version: String
   }
 `;
 
@@ -123,7 +125,8 @@ const resolvers = {
   Query: {
     weatherStations: () => weatherStations,
     weatherStationData: (parent, {stationId, year}) => getWeatherStationData(stationId, year),
-    provinces: getProvinces
+    provinces: getProvinces,
+    version: () => weatherStationsData.version
   },
 };
 
