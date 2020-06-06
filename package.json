@@ -20,7 +20,7 @@
   "author": "augmity",
   "license": "MIT",
   "dependencies": {
-    "apollo-server": "^2.9.9",
+    "apollo-server": "^2.14.2",
     "csvtojson": "^2.0.10",
     "graphql": "^14.5.8",
     "moment": "^2.24.0",
